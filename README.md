@@ -13,7 +13,7 @@ https://github.com/penglong/SimpleWeather/assets/1752197/a14b689f-5c4e-48fb-a09f
 
 ## Known Issues
 
-- `HorizontalPager` Behavior: On some devices or emulators, the `HorizontalPager` might display pages in a reversed order, or it's a implementation bug to fix. For a demonstration of the expected behavior, please refer to the above demo video.
+- HorizontalPager Behavior: The HorizontalPager page indicator may malfunction on certain devices or emulators, indicating a bug that requires attention. For an example of the intended behavior, please see the demo video recorded on an emulator above.
  
 ## Dependencies
 
