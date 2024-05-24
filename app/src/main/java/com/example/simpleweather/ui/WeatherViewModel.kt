@@ -114,7 +114,7 @@ class WeatherViewModel(
     @SuppressLint("MissingPermission")
     fun fetchWeatherDataWithPermissionGranted() {
         locationProvider.lastLocation.addOnSuccessListener { location ->
-            fetchWeatherDataByCoordinates(location.latitude, location.longitude)
+            location?.let {fetchWeatherDataByCoordinates(location.latitude, location.longitude)  }
         }
     }
 
