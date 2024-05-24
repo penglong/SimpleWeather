@@ -10,11 +10,15 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.simpleweather.R
 import com.example.simpleweather.WeatherApplication
 import com.example.simpleweather.data.CityData
+import com.example.simpleweather.data.Location
 import com.example.simpleweather.database.WeatherDao
+import com.example.simpleweather.database.WeatherEntity
 import com.example.simpleweather.network.WeatherService
 import com.example.simpleweather.util.Constants.WEATHER_API_KEY
-import com.example.simpleweather.util.DataMapper
-import com.example.simpleweather.util.NetworkUtils
+import com.example.simpleweather.util.asCityData
+import com.example.simpleweather.util.asWeatherData
+import com.example.simpleweather.util.asWeatherEntity
+import com.example.simpleweather.util.isInternetAvailable
 import com.google.android.gms.location.FusedLocationProviderClient
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -43,12 +47,12 @@ class WeatherViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
     private val isInternetAvailable: Boolean
-        get() = NetworkUtils.isInternetAvailable(WeatherApplication.instance)
+        get() = isInternetAvailable(WeatherApplication.instance)
 
     val weatherData = weatherDao.getAll()
         .map { list ->
             if (list.isNotEmpty()) {
-                list.map(DataMapper::toWeatherData)
+                list.map(WeatherEntity::asWeatherData)
             } else {
                 emptyList()
             }
@@ -97,7 +101,7 @@ class WeatherViewModel(
                     )
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        _searchResults.value = it.toList().map(DataMapper::toCityData)
+                        _searchResults.value = it.toList().map(Location::asCityData)
                     }
                 } else {
                     Log.e(TAG, "API response error: ${response.message()}")
@@ -114,7 +118,7 @@ class WeatherViewModel(
     @SuppressLint("MissingPermission")
     fun fetchWeatherDataWithPermissionGranted() {
         locationProvider.lastLocation.addOnSuccessListener { location ->
-            location?.let {fetchWeatherDataByCoordinates(location.latitude, location.longitude)  }
+            location?.let { fetchWeatherDataByCoordinates(location.latitude, location.longitude) }
         }
     }
 
@@ -145,9 +149,8 @@ class WeatherViewModel(
             )
             if (response.isSuccessful) {
                 response.body()?.let {
-                    val newWeatherEntity = DataMapper.toWeatherEntity(it)
                     // Update the local database with the new data
-                    weatherDao.insert(newWeatherEntity)
+                    weatherDao.insert(it.asWeatherEntity())
                     currentPage.value = 0
                 }
             } else {
